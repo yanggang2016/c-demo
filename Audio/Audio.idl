@@ -1,0 +1,75 @@
+// Audio.idl : Audio的 IDL 源
+//
+
+// 此文件将由 MIDL 工具处理以
+// 产生类型库(Audio.tlb)和封送处理代码。
+
+#include "olectl.h"
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(a817e7a2-43fa-11d0-9e44-00aa00b6770a),
+	dual,	
+	pointer_default(unique)
+]
+interface IComponentRegistrar : IDispatch
+{
+	[id(1)]	HRESULT Attach([in] BSTR bstrPath);
+	[id(2)]	HRESULT RegisterAll();
+	[id(3)]	HRESULT UnregisterAll();
+	[id(4)]	HRESULT GetComponents([out] SAFEARRAY(BSTR)* pbstrCLSIDs, [out] SAFEARRAY(BSTR)* pbstrDescriptions);
+	[id(5)]	HRESULT RegisterComponent([in] BSTR bstrCLSID);
+	[id(6)] HRESULT UnregisterComponent([in] BSTR bstrCLSID);
+};
+
+[
+	object,
+	uuid(59F0EB52-7622-4F5D-BE7C-ACABE5E37620),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IInterfaceForJs : IDispatch{
+	[id(1)] HRESULT ControlDevice([in] LONG control_number, [out, retval] LONG* result);
+	[id(2)] HRESULT ControlDevice2([in] LONG control_number, [in] LONG value, [out, retval] LONG* result);
+	[id(3)] HRESULT init_device([in] BSTR psn, [in] BSTR ip, [in] LONG tcp_port, [in] LONG udp_port, [out, retval] LONG* result);
+};
+
+[
+	uuid(5F99F348-CA6C-4B71-8859-FB77B0E073B3),
+	version(1.0),
+	custom(a817e7a1-43fa-11d0-9e44-00aa00b6770a,"{E7E83335-CD34-4925-896B-95F07C7DCA2A}")
+]
+library AudioLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(E7E83335-CD34-4925-896B-95F07C7DCA2A)		
+	]
+	coclass CompReg
+	{
+		[default] interface IComponentRegistrar;
+	};
+	[
+		uuid(20476D91-09EC-46B7-BF18-31EAAE3708D1)		
+	]
+	dispinterface _IInterfaceForJsEvents
+	{
+		properties:
+		methods:
+			[id(1)] HRESULT my_call_back(LONG code, CHAR* str, LONG str_len);
+	};
+	[
+		uuid(82FC79BC-2805-42A9-B1CC-21EC127D0954),		
+		licensed,
+		control
+	]
+	coclass InterfaceForJs
+	{
+		[default] interface IInterfaceForJs;
+		[default, source] dispinterface _IInterfaceForJsEvents;
+	};
+};
+

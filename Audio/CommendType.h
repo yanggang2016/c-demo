@@ -1,0 +1,15 @@
+#pragma once
+
+
+enum CommandType {
+	LOGIN = 0X01,
+	QUERY_GROUP,
+	QUERY_MEMBERS,
+	JOIN_GROUP,
+	LEAVE_GROUP,
+	REQUEST_MIC,
+	RELEASE_MIC,
+	LOGOUT,
+	CALL,
+	PING = 0X41
+};

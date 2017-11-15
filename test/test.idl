@@ -1,0 +1,75 @@
+// test.idl : test的 IDL 源
+//
+
+// 此文件将由 MIDL 工具处理以
+// 产生类型库(test.tlb)和封送处理代码。
+
+#include "olectl.h"
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(a817e7a2-43fa-11d0-9e44-00aa00b6770a),
+	dual,	
+	pointer_default(unique)
+]
+interface IComponentRegistrar : IDispatch
+{
+	[id(1)]	HRESULT Attach([in] BSTR bstrPath);
+	[id(2)]	HRESULT RegisterAll();
+	[id(3)]	HRESULT UnregisterAll();
+	[id(4)]	HRESULT GetComponents([out] SAFEARRAY(BSTR)* pbstrCLSIDs, [out] SAFEARRAY(BSTR)* pbstrDescriptions);
+	[id(5)]	HRESULT RegisterComponent([in] BSTR bstrCLSID);
+	[id(6)] HRESULT UnregisterComponent([in] BSTR bstrCLSID);
+};
+
+[
+	object,
+	uuid(88CC4868-0637-424E-93D5-C23649721886),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface Itest1 : IDispatch{
+	[id(1)] HRESULT test1([in] CHAR* a, [out, retval] CHAR* b);
+	[id(2)] HRESULT test2([in] CHAR* a, [out, retval] CHAR* b);
+	[id(3)] HRESULT test3([in] CHAR a, [out, retval] CHAR* b);
+	[id(4)] HRESULT test4([in] BSTR a, [out, retval] BSTR* b);
+};
+
+[
+	uuid(E41A31E2-951B-445D-B78A-298F25367F42),
+	version(1.0),
+	custom(a817e7a1-43fa-11d0-9e44-00aa00b6770a,"{ADFAA9DF-7F70-4FB4-AEBA-EEC39AC0B79F}")
+]
+library testLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(ADFAA9DF-7F70-4FB4-AEBA-EEC39AC0B79F)		
+	]
+	coclass CompReg
+	{
+		[default] interface IComponentRegistrar;
+	};
+	[
+		uuid(F9C4125A-CA5C-4DBD-BF3A-ACDC94CA3AB4)		
+	]
+	dispinterface _Itest1Events
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(6B0F2D90-9B88-4158-A1F4-3C00854CAAE3),		
+		licensed,
+		control
+	]
+	coclass test1
+	{
+		[default] interface Itest1;
+		[default, source] dispinterface _Itest1Events;
+	};
+};
+

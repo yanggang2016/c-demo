@@ -1,0 +1,37 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+<TITLE>对象 InterfaceForJs 的 ATL 测试页</TITLE>
+</HEAD>
+<BODY>
+
+
+<OBJECT ID="InterfaceForJs" CLASSID="CLSID:82FC79BC-2805-42A9-B1CC-21EC127D0954"></OBJECT>
+<input type="button" value="Add" onclick="add();" />
+<input type="button" value="Add" onclick="addAsync();" />
+
+<script type="text/javascript">
+    function add() {
+        var calc = document.getElementById('InterfaceForJs');
+		 var Result = calc.init_device('171019003','192.168.0.155',11390,11392);
+		alert(Result);
+    }
+</script>
+
+
+
+<script type="text/javascript">
+    function addAsync() {
+        var calc = document.getElementById('InterfaceForJs');
+        //calc.attachEvent("my_call_back", OnAddCompleted);
+        calc.ControlDevice(1);
+    }
+
+    function OnAddCompleted(varResult) {
+        alert(varResult);
+
+    }
+</script>
+
+</BODY>
+</HTML>

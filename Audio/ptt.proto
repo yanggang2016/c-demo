@@ -1,0 +1,210 @@
+message User {
+  required uint32 uid = 1;   //user ID,用于在主动上报其他用户的时候的标识
+  required string name  = 2;   //user的name,用于在主动上报其他用户名称的时候的标识
+  optional bool online = 3;   //在线状态  
+  optional uint32 usr_attri = 4;    //用户属性设置，先初始化为1  
+  //…以后想增加对用户的描述，可以在这里添加  
+}
+
+message Group {
+  required uint32 gid = 1;       //Group ID
+  required string name = 2;      //Group的name字段
+  required uint32 n_members = 3; //Group的多少个成员字段
+  
+  enum GroupType {
+    BUILTIN = 0;   //代码中写死的
+    STATIC = 1;    //后台设置的
+    TEMP = 2;      //临时创建的
+  } 
+  optional GroupType type = 4 [default = STATIC];      
+}
+
+message Configure {
+  required uint32 default_group = 1;   //默认群组
+  optional uint32 loc_report_period = 2;  //GPS上报周期
+  optional bool audio_enabled = 3 [default = true];   //是否允许说话  
+  optional uint32 cfg_ptt_timeout = 4;   //PTT话语权一次最长时间
+  optional uint32  heart_inter = 5;   //终端UDP心跳包的时间间隔
+  //…以后想增加设置，可以在这里添加
+}
+
+message ServerInfo {
+  required string address = 1;
+  required uint32 port = 2;
+}
+
+message Login {
+  required string account = 1;    //用户名
+  optional string password = 2;   //密码，默认没有
+  optional int32 version = 3;     //版本号码
+  required string platform = 4;   //  “brew”
+  required string device = 5;     // “HS001C”，后面可能需要区分手持机还是车机
+  optional string meid = 6;       // meid字串
+  optional uint32 expect_payload = 7 [default = 101];    //101指AMR,111是EVRC
+}
+
+message LoginAck {
+  required int32 result = 1;   //-1代表失败，>=0 代表成功
+  required User usr  = 2;  
+  required Configure conf  = 3;  
+  optional ServerInfo tcp_server = 4;  // TCP 服务器 
+  optional ServerInfo udp_server = 5;  // UDP 服务器
+  optional ServerInfo update_server = 6; // 升级服务器
+  optional uint32 cookie = 7; //随机种子
+}
+
+message QueryGroup {
+  enum DetailLevel {
+    ONLY_ID = 0;
+    GROUP_INFO = 1;
+  }
+  required DetailLevel detail = 1 [default = GROUP_INFO]; //是只返回群组ID还是带群组名称的，默认是带名称的 
+  optional bool include_temp = 2 [default = false];  //是否包括临时群组，默认是不包括的
+}
+
+message QueryGroupAck {
+  required int32 result = 1;    //-1:fail   >=0  succ  
+  repeated Group groups = 2;  
+}
+
+message QueryMembers {
+  repeated uint32 gids = 1;            //多个group可以查询，一般一次只查询一个
+  
+  enum DetailLevel {
+    ONLY_ID = 0;
+    USER_INFO = 1;
+  }
+  optional DetailLevel detail = 2 [default = USER_INFO];   
+}
+
+message QueryMembersAck {
+  required int32 result = 1;    
+  
+  message GroupMembers {
+    required uint32 gid = 1;
+    repeated uint32 ingroups = 2;       //在线用户的ID
+    repeated uint32 outgroups = 3;      //离线用户的ID
+    
+    repeated User members = 4;          //每个用户的详细信息
+  }
+  repeated GroupMembers members = 2;  
+}
+
+message JoinGroup { 
+  required uint32 gid = 1;    //希望进入的群组的ID号
+}
+
+message JoinGroupAck {
+  required int32 result = 1;  //-1代表失败，>=0 代表成功
+  optional uint32 gid = 2;    //也可以把gid带下来
+}
+
+message LeaveGroup { 
+  optional uint32 gid = 1;    //希望退出的群组的ID号，这里只能退出当前所在的工作群组
+}
+
+message LeaveGroupAck {
+  required int32 result = 1;  //-1代表失败，>=0 代表成功
+  optional uint32 gid = 2;    //也可以把gid带下来
+}
+
+message RequestMic { 
+  optional uint32 gid = 1;     
+  optional uint32 uid = 2;      //如果服务器的确需要uid,这里可以考虑带上去   
+  optional uint32 payload = 3;  //预留一些字段
+}
+
+message RequestMicAck {
+  required int32 result = 1;   //-1代表失败，>=0 代表成功
+  optional uint32 cookie = 2; //随机种子
+}
+
+message ReleaseMic{ 
+  optional uint32 gid = 1;       
+  optional uint32 uid = 2;    //如果服务器的确需要uid,这里可以考虑带上去   
+}
+
+message ReleaseMicAck{
+  required int32 result = 1;   //-1代表失败，>=0 代表成功
+}
+
+//临时呼叫的请求(包括单呼)
+message Call {
+  repeated uint32 uid = 1;             //多个用户ID
+}
+
+//临时呼叫的请求(包括单呼)的响应
+message CallAck {
+  required int32 result = 1;    
+  repeated uint32 uid = 2;             //多个用户ID
+}
+
+//后台设置的 PUSH 消息，告诉被单呼方关于单呼发起方的名称
+message TempCallArrived {
+  required string call_name = 1; // 单呼发起方的名称
+}
+
+//后台设置的 PUSH 消息，临时呼叫状态提示
+message TempCallStatus {
+  required uint32 call_status = 1;  // 0 -- 临时呼叫超时退出
+}
+
+message Logout {   
+}
+
+message LogoutAck {
+  required int32 result = 1;   //-1代表失败，>=0 代表成功
+}
+
+message ReportLocation {
+  required double longitude = 1;                  //经度
+  required double latitude = 2;                 //纬度
+}
+
+message ReportLocationAck{
+  required int32 result = 1;   //-1代表失败，>=0 代表成功
+}
+
+message Ping {
+  optional uint32 timestamp = 1;        
+}
+
+message PingAck {
+  optional uint32 timestamp = 1;        
+}
+
+message LostMic {
+  required uint32 gid = 1; 
+  required string reason = 2;   
+}
+
+message Kickout {
+  required string reason = 1;    
+}
+
+message Reconfigured {
+  required Configure conf = 1; 
+}
+
+message CurrentGroup {
+  required uint32 gid = 1; 
+  required string reason = 2;   
+  required string gname = 3;     //群组名称  
+}
+
+message GroupListChanged {
+  repeated Group update_groups = 1; 
+  repeated uint32 rm_groups = 2;   
+}
+
+message MemberGetMic {
+  required uint32 gid = 1;   //群组ID还是带上，防止出问题不好调试 
+  required uint32 uid = 2;
+  optional string name = 3;
+}
+
+message MemberLostMic{
+  required uint32 gid = 1;   //群组ID还是带上，防止出问题不好调试 
+  required uint32 uid = 2;    
+}
+
